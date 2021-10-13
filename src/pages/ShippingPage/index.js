@@ -1,56 +1,50 @@
-import React from "react";
-import { connect } from "react-redux";
+import React, { useContext } from "react";
 import Burger from "../../components/Burger";
 import Button from "../../components/General/Button";
 import { Route } from "react-router-dom";
 import css from "./style.module.css";
 import ContactData from "../../components/ContactData";
+import BurgerContext from "../../context/BurgerContext";
 
-class ShippingPage extends React.Component {
-  cancelOrder = () => {
-    this.props.history.goBack();
+const ShippingPage = (props) => {
+  const ctx = useContext(BurgerContext);
+  const cancelOrder = () => {
+    props.history.goBack();
   };
 
-  showContactData = () => {
-    this.props.history.replace("/ship/contact");
+  const showContactData = () => {
+    props.history.replace("/ship/contact");
   };
 
-  render() {
-    return (
-      <div className={css.ShippingPage}>
-        <p style={{ fontSize: "24px" }}>
-          <strong>Таны захиалга амттай байх болно гэж найдаж байна...</strong>
-        </p>
-        <p style={{ fontSize: "24px" }}>
-          <strong>Дүн : {this.props.price}₮</strong>
-        </p>
+  return (
+    <div className={css.ShippingPage}>
+      <p style={{ fontSize: "24px" }}>
+        <strong>Таны захиалга амттай байх болно гэж найдаж байна...</strong>
+      </p>
+      <p style={{ fontSize: "24px" }}>
+        <strong>Дүн : {ctx.burger.totalPrice}₮</strong>
+      </p>
 
-        <Burger />
+      <Burger />
 
-        <Button
-          daragdsan={this.cancelOrder}
-          btnType="Danger"
-          text="ЗАХИАЛГЫГ ЦУЦЛАХ"
-        />
+      <Button
+        daragdsan={cancelOrder}
+        btnType="Danger"
+        text="ЗАХИАЛГЫГ ЦУЦЛАХ"
+      />
 
-        <Button
-          daragdsan={this.showContactData}
-          btnType="Success"
-          text="ХҮРГЭЛТИЙН МЭДЭЭЛЭЛ ОРУУЛАХ"
-        />
+      <Button
+        daragdsan={showContactData}
+        btnType="Success"
+        text="ХҮРГЭЛТИЙН МЭДЭЭЛЭЛ ОРУУЛАХ"
+      />
 
-        <Route path="/ship/contact">
-          <ContactData />
-        </Route>
-      </div>
-    );
-  }
+      <Route path="/ship/contact">
+        <ContactData />
+      </Route>
+    </div>
+  );
 }
 
-const mapStateToProps = state => {
-  return {
-    price: state.burgerReducer.totalPrice
-  };
-};
 
-export default connect(mapStateToProps)(ShippingPage);
+export default ShippingPage;

@@ -4,6 +4,7 @@ import css from "./style.module.css";
 const Button = props => (
   <button
     onClick={props.daragdsan}
+    disabled={props.disabled}
     className={`${css.Button} ${css[props.btnType]}`}
   >
     {props.text}

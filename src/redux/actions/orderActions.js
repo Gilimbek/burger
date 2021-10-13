@@ -59,6 +59,12 @@ export const saveOrder = newOrder => {
   };
 };
 
+export const clearOrder = () => {
+  return {
+    type: "CLEAR_ORDER"
+  };
+};
+
 export const saveOrderStart = () => {
   return {
     type: "SAVE_ORDER_START"

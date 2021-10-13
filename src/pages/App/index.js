@@ -1,34 +1,38 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import css from "./style.module.css";
-
 import Toolbar from "../../components/Toolbar";
-import BurgerPage from "../BurgerPage";
 import SideBar from "../../components/SideBar";
-import OrderPage from "../OrderPage";
 import { Route, Switch } from "react-router-dom";
 import ShippingPage from "../ShippingPage";
 import Burger from "../../components/Burger";
 import LoginPage from "../LoginPage";
-import SignupPage from "../SignupPage";
 import Logout from "../../components/Logout";
 import * as actions from "../../redux/actions/loginActions";
 import * as signupActions from "../../redux/actions/signupActions";
+import { BurgerStore } from "../../context/BurgerContext";
 
 
-class App extends Component {
-  state = {
-    showSidebar: false
+const BurgerPage = React.lazy(() => {
+  return import("../BurgerPage");
+})
+const OrderPage = React.lazy(() => {
+  return import("../OrderPage");
+})
+const SignupPage = React.lazy(() => {
+  return import("../SignupPage");
+})
+
+
+const App = props => {
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  const toggleSideBar = () => {
+    setShowSidebar(prevShowSideBar => !prevShowSideBar);
   };
 
-  toggleSideBar = () => {
-    this.setState(prevState => {
-      return { showSidebar: !prevState.showSidebar };
-    });
-  };
-
-  componentDidMount = () => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("userId");
     const expireDate = new Date(localStorage.getItem("expireDate"));
@@ -36,51 +40,50 @@ class App extends Component {
     if (token) {
       if (expireDate > new Date()) {
         // Hugatsaa n duusaagui token bna, avto login hiine
-        this.props.autoLogin(token, userId);
+        props.autoLogin(token, userId);
 
         // Token huchingui bolohod uldej baigaa hugatsaag tootsoolj Ter hugatsaanii daraa avtomataar logout hiine
-        this.props.autoLogoutAfterMillisec(expireDate.getTime() - new Date().getTime());
+        props.autoLogoutAfterMillisec(expireDate.getTime() - new Date().getTime());
       } else {
         // Token hugatsaa n duussan bna, logout hiine
-        this.props.logout();
+        props.logout();
 
       }
 
     }
-  };
+  }, []);
 
-  render() {
-    return (
-      <div>
-        <Toolbar toggleSideBar={this.toggleSideBar} />
+  return (
+    <div>
+      <Toolbar toggleSideBar={toggleSideBar} />
 
-        <SideBar
-          showSidebar={this.state.showSidebar}
-          toggleSideBar={this.toggleSideBar}
-        />
+      <SideBar
+        showSidebar={showSidebar} toggleSideBar={toggleSideBar}
+      />
 
-        <main className={css.Content}>
+      <main className={css.Content}>
+        <BurgerStore>
+          <Suspense fallback={<div>Түр хүлээнэ үү...</div>}>
+            {props.userId ? (
+              <Switch>
+                <Route path="/logout" component={Logout} />
+                <Route path="/orders" component={OrderPage} />
+                <Route path="/ship" component={ShippingPage} />
+                <Route path="/" component={BurgerPage} />
+              </Switch>
 
-          {this.props.userId ? (
-            <Switch>
-              <Route path="/logout" component={Logout} />
-              <Route path="/orders" component={OrderPage} />
-              <Route path="/ship" component={ShippingPage} />
-              <Route path="/" component={BurgerPage} />
-            </Switch>
-
-          ) : (
-            <Switch>
-              <Route path="/signup" component={SignupPage} />
-              <Route path="/login" component={LoginPage} />
-              <Redirect to="/login" />
-            </Switch>
-          )}
-
-        </main>
-      </div>
-    );
-  }
+            ) : (
+              <Switch>
+                <Route path="/signup" component={SignupPage} />
+                <Route path="/login" component={LoginPage} />
+                <Redirect to="/login" />
+              </Switch>
+            )}
+          </Suspense>
+        </BurgerStore>
+      </main>
+    </div>
+  );
 }
 
 const mapStateToProps = state => {
